@@ -76,7 +76,7 @@ public class GeneticAlgorithm extends Object {
 		for(int i = GA_population.size()-1 ; i >= 0 ;i--)
 		{
 			
-			if(GA_population.get(i).GetCost() == 0 && counter > 0)
+			if(GA_population.get(i).getCost() == 0 && counter > 0)
 			{
 				System.out.format("Chromosome (%s) got extinct.\n",GA_population.get(i).logicName);
 				GA_population.remove(i);
@@ -124,8 +124,8 @@ public class GeneticAlgorithm extends Object {
 
 		  public int compare(Chromosome c1, Chromosome c2)
 		  {
-			 Double d1 = new Double(c1.GetCost());
-			 Double d2 = new Double(c2.GetCost());
+			 Double d1 = new Double(c1.getCost());
+			 Double d2 = new Double(c2.getCost());
 		     return d2.compareTo(d1);
 		  }
 		});
@@ -153,7 +153,7 @@ public class GeneticAlgorithm extends Object {
 	{
 		for(int i = 0 ; i < GA_population.size(); i++)
 		{
-			if(GA_population.get(i).GetCost() == goal)
+			if(GA_population.get(i).getCost() == goal)
 			{
 				return true;
 			}

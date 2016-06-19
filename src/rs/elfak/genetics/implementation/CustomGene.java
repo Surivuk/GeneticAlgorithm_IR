@@ -5,90 +5,73 @@ import java.util.Random;
 import rs.elfak.genetics.coreAPI.Gene;
 
 public class CustomGene extends Gene{
-
-	//public char value;
 	
-	public CustomGene()
-	{
+	public CustomGene() {
 		Random r = new Random();
 
 	    String alphabet = "qwertyuiopasdfghjklzxcvbnm";
 	    
 	    char value = alphabet.charAt(r.nextInt(alphabet.length()));
 	    
-	    this.SetValue(value);
+	    this.setValue(value);
 	}
 	
-	public CustomGene(char character)
-	{
-		this.SetValue(character);
+	public CustomGene(char character) {
+		this.setValue(character);
 	}
 	
 	@Override
 	public void MutateGene() {
-		
-		if(this._cost == 0)
-		{
+		if(this.cost == 0){
 			Random r = new Random();
 
 		    String alphabet = "qwertyuiopasdfghjklzxcvbnm";
 		    
 		    char value = alphabet.charAt(r.nextInt(alphabet.length()));
 		    
-		    this.SetValue(value);
+		    this.setValue(value);
 		}
-		
-	    
 	}
 
 	@Override
 	public boolean isEqual(Gene g2) {
 		// TODO Auto-generated method stub
-		if(g2 instanceof CustomGene)
-		{
+		if(g2 instanceof CustomGene){
 			CustomGene casted = (CustomGene) g2;
-			char rightVal = (char)casted.GetValue();
-			char leftVal = (char)this.GetValue();
+			char rightVal = (char) casted.getValue();
+			char leftVal = (char) this.getValue();
 			return leftVal == rightVal;
 			
 		}
 		else{
 			return false;
 		}
-		
 	}
 
 	@Override
 	public void fitnesTest(Object test) {
 		// TODO Auto-generated method stub
-		if(test != null)
-		{
-			if(test instanceof String)
-			{
+		if(test != null){
+			if(test instanceof String){
 				String goal = (String) test;
 				
-				char value = (char) this.GetValue();
+				char value = (char) this.getValue();
 				String stringValueOf = String.valueOf(value);
 				
 				if(stringValueOf.equals(goal))
-				{
-					this._cost = 1;
-				}
-				else{
-					this._cost = 0;
-				}
-				
+					this.cost = 1;
+				else
+					this.cost = 0;
 			}
 		}
 		else{
 			
 		}
-		
 	}
 
 	@Override
 	public String ShowResult() {
-		char val = (char) this._value;
+		char val = (char) this.value;
 		String returnVal = String.valueOf(val);
 		
 		return returnVal;
