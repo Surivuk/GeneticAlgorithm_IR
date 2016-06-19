@@ -42,22 +42,22 @@ public class Mate {
 		{
 			MT_father = population.get(MT_posFather);
 			MT_mother = population.get(MT_posMother);
-			MT_child1 = new Chromosome(MT_numGenes);
-			MT_child2 = new Chromosome(MT_numGenes);
+			MT_child1 = new Chromosome();
+			MT_child2 = new Chromosome();
 			Random rnum = new Random();
 			int crossPoint = rnum.nextInt(MT_numGenes);
 			
 			//left side
 			for(int i = 0 ; i < crossPoint;i++)
 			{
-				MT_child1.SetGene(i, MT_father.GetGene(i));
-				MT_child2.SetGene(i, MT_mother.GetGene(i));
+				MT_child1.setGene(MT_father.getGene(i));
+				MT_child2.setGene(MT_mother.getGene(i));
 			}
 			//right side
 			for(int i = crossPoint; i < MT_numGenes;i++)
 			{
-				MT_child1.SetGene(i, MT_mother.GetGene(i));
-				MT_child2.SetGene(i, MT_father.GetGene(i));
+				MT_child1.setGene(MT_mother.getGene(i));
+				MT_child2.setGene(MT_father.getGene(i));
 			}
 			population.add(MT_posChild1,MT_child1);
 			population.add(MT_posChild2, MT_child2);

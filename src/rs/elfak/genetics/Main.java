@@ -9,7 +9,9 @@ public class Main {
 		// TODO Auto-generated method stub
 		
 		
-		Search searchEngine = new Search("",false);
+		//Search searchEngine = new Search("",false);
+		
+		System.out.println("Radi!");
 		
 	}
 

@@ -4,9 +4,8 @@ import rs.elfak.genetics.coreAPI.Gene;
 
 public class ParagraphGene extends Gene{
 	
-	private String mapKey;
+	//private String mapKey;
 	
-
 	@Override
 	public void MutateGene() {
 		// TODO Auto-generated method stub

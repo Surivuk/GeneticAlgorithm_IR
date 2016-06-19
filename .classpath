@@ -2,13 +2,13 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="E:/a za fax/VIII semestar/Pretrazivanje Informacija/jsoup-1.9.1.jar"/>
-	<classpathentry kind="lib" path="E:/a za fax/VIII semestar/Pretrazivanje Informacija/lucene-5.5.0/core/lucene-core-5.5.0.jar"/>
-	<classpathentry kind="lib" path="E:/a za fax/VIII semestar/Pretrazivanje Informacija/lucene-5.5.0/demo/lucene-demo-5.5.0.jar"/>
-	<classpathentry kind="lib" path="E:/a za fax/VIII semestar/Pretrazivanje Informacija/lucene-5.5.0/analysis/common/lucene-analyzers-common-5.5.0.jar"/>
-	<classpathentry kind="lib" path="E:/a za fax/VIII semestar/Pretrazivanje Informacija/lucene-5.5.0/queries/lucene-queries-5.5.0.jar"/>
-	<classpathentry kind="lib" path="E:/a za fax/VIII semestar/Pretrazivanje Informacija/lucene-5.5.0/queryparser/lucene-queryparser-5.5.0.jar"/>
-	<classpathentry kind="lib" path="E:/a za fax/VIII semestar/Pretrazivanje Informacija/lucene-5.5.0/memory/lucene-memory-5.5.0.jar"/>
-	<classpathentry kind="lib" path="E:/a za fax/VIII semestar/Pretrazivanje Informacija/lucene-5.5.0/benchmark/lucene-benchmark-5.5.0.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Disc 2 /Projekti/Java libs/jsoup-1.9.2.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Disc 2 /Projekti/Java libs/lucene-5.5.0/core/lucene-core-5.5.0.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Disc 2 /Projekti/Java libs/lucene-5.5.0/demo/lucene-demo-5.5.0.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Disc 2 /Projekti/Java libs/lucene-5.5.0/analysis/common/lucene-analyzers-common-5.5.0.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Disc 2 /Projekti/Java libs/lucene-5.5.0/queries/lucene-queries-5.5.0.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Disc 2 /Projekti/Java libs/lucene-5.5.0/queryparser/lucene-queryparser-5.5.0.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Disc 2 /Projekti/Java libs/lucene-5.5.0/memory/lucene-memory-5.5.0.jar"/>
+	<classpathentry kind="lib" path="/Volumes/Disc 2 /Projekti/Java libs/lucene-5.5.0/benchmark/lucene-benchmark-5.5.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

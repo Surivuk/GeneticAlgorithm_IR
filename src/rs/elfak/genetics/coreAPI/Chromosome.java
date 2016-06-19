@@ -1,99 +1,77 @@
 package rs.elfak.genetics.coreAPI;
 
+import java.util.List;
+import java.util.ArrayList;
+
 public class Chromosome {
 	
 	public String logicName;
-	protected int _nGenes;
-	protected double _cost;
-	protected Gene[] _genes;
+	protected double cost;
+	protected List<Gene> genes;
 	
-	public Chromosome(int numGenes)
-	{
-		_nGenes = numGenes;
-		_genes = new Gene[_nGenes];
-	}
-	public int GetGenes()
-	{
-		return _nGenes;
+	public Chromosome(){
+		genes = new ArrayList<>();
 	}
 	
-	public double GetCost()
-	{
+	public double getCost(){
 		double sum = 0;
-		for(int i = 0 ; i < _nGenes; i++)
-		{
-			sum += _genes[i].GetCost();
-		}
+		for(int i = 0 ; i < genes.size(); i++)
+			sum += genes.get(i).getCost();
 		return sum;
 	}
-	public void SetGene(int index,Gene value)
-	{
-		if(index < _nGenes && index >= 0 )
-		{
-			_genes[index] = value;
-		}
+	
+	public void setGene(Gene value){
+		genes.add(value);
 	}
-	public Gene GetGene(int index)
-	{
-		if(index < _nGenes)
-		{
-			return _genes[index];
-		}
-		else return null;
+	
+	public Gene getGene(int index){
+		if(index < genes.size())
+			return genes.get(index);
+		else 
+			return null;
 	}
 	
 
-	public void MutateGenes()
-	{
+	public void MutateGenes(){
 		int index = (int)(Math.random() * 10);
-		index = index  % _genes.length;
-		
-		_genes[index].MutateGene();
-		
-		
+		index = index  % genes.size();
+		genes.get(index).MutateGene();
 	}
-	public void Fitness(Object obj)
-	{
+	
+	public void Fitness(Object obj){
 		if(obj instanceof String)
 		{
 			int len = ((String) obj).length();
 			String str = (String) obj;
-			for(int i = 0 ; i < _genes.length; i++)
-			{
-				
-				_genes[i].fitnesTest(str.subSequence(i, i+1));
-			}
+			for(int i = 0 ; i < genes.size(); i++)
+				genes.get(i).fitnesTest(str.subSequence(i, i+1));
 		}
 	}
-	public boolean equals(Chromosome obj)
-	{
+	
+	public boolean equals(Chromosome obj){
 		boolean equal = true;
 		int i = 0;
 		
-		while(i < _genes.length && equal)
-		{
+		while(i < genes.size() && equal){
 			int j = 0;
-			while(j < obj.GetGenes())
-			{
-				equal = equal && _genes[i].isEqual(obj.GetGene(j));
+			while(j < genes.size()){
+				equal = equal && genes.get(i).isEqual(obj.getGene(j));
 				j++;
 			}
-			//ako nakon uporedjivanja prvog svog gena sa svim ostalim genima u hromozomu obj ne nadjemo nijedan takav
-			//to znaci da se hormozomi razlikuju
 			if(!equal)
 				return false;
 			i++;
 		}
 		return equal;
 	}
-	public void printContent()
-	{
+	
+	public void printContent(){
 		String msg = logicName + "'s contents are : ";
-		for(int i = 0 ; i < _genes.length; i++)
+		for(int i = 0 ; i < genes.size(); i++)
 		{
-			msg += _genes[i].ShowResult() + "\t";
+			msg += genes.get(i).ShowResult() + "\t";
 		}
-		msg += "\tCost: "+String.valueOf(GetCost());
+		msg += "\tCost: "+String.valueOf(getCost());
 		System.out.println(msg);
 	}
 }

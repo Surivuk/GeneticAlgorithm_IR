@@ -142,12 +142,8 @@ public class Search {
             IndexReader reader = DirectoryReader.open(dir);
             IndexSearcher searcher = new IndexSearcher(reader);
             
-            
             Query q = NumericRangeQuery.newLongRange(SIZE, lowLine, hightLine, true, true);
-            
-            
-            
-            
+
             TopScoreDocCollector collector = TopScoreDocCollector.create(10);
             searcher.search(q, collector);
             List<String> retList = new ArrayList<>();
@@ -156,8 +152,7 @@ public class Search {
             for(int i = 0; i < docs.scoreDocs.length; i++){
                 Document d = reader.document(docs.scoreDocs[i].doc);
                 System.out.println(d.get(TITLE) + ", " + d.get(SIZE));
-            }
-            
+            } 
             
             reader.close();
             dir.close();
