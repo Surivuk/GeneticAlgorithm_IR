@@ -5,17 +5,17 @@
  */
 package rs.elfak.genetics.searcher;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.benchmark.byTask.feeds.DemoHTMLParser;
-import org.apache.lucene.benchmark.byTask.feeds.DemoHTMLParser.Parser;
-import org.apache.lucene.benchmark.byTask.feeds.HTMLParser;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
@@ -23,11 +23,8 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
-
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.Directory;
@@ -35,34 +32,16 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.StringTokenizer;
-import org.apache.lucene.analysis.TokenFilter;
-import org.apache.lucene.codecs.blocktree.FieldReader;
 import org.apache.lucene.document.FieldType;
-import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.LongField;
-import org.apache.lucene.index.FilterLeafReader.FilterTerms;
-import org.apache.lucene.index.MultiTerms;
 import org.apache.lucene.index.Terms;
-import org.apache.lucene.queries.BooleanFilter;
-import org.apache.lucene.queryparser.classic.ParseException;
-import static org.apache.lucene.queryparser.classic.QueryParserConstants.Range;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.NumericRangeQuery;
-import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.ClassicSimilarity;
-import org.apache.lucene.search.similarities.DefaultSimilarity;
-import org.apache.lucene.search.similarities.Similarity;
-import org.apache.lucene.search.similarities.TFIDFSimilarity;
-import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.BytesRef;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.BooleanQuery.Builder;
@@ -72,17 +51,10 @@ import org.apache.lucene.search.BooleanQuery.Builder;
  * @author aleksandarx
  */
 
-
-
 import org.apache.lucene.index.Fields;
-import org.apache.lucene.index.LeafReaderContext;
-import org.apache.lucene.index.MultiFields;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
-
-
-import org.xml.sax.SAXException;
 
 
 class IsolationSimilarity extends ClassicSimilarity {
@@ -111,13 +83,14 @@ public class Search {
     public static String TITLE = "title";
     public static String SIZE = "size";
     public static String parsedBody = "";
-    public Search(String docDir,Boolean htmlIndexing){
+    public Search(String docDir, Boolean htmlIndexing){
     	if(!htmlIndexing)
     	{
-    		indexDirectoryPath = "D:\\Index\\";
+    		indexDirectoryPath = "/Volumes/Disc 2 /Projekti/PI_Data/Index/";
             docDirectoryPath = docDir;
             analyzer = new StandardAnalyzer();
             //loadAllDocs(docDir);
+            //parseDocument(docDir, "", false);
     	}
     	else{
     		indexDirectoryPath = "C:\\Users\\Darko\\workspace\\Lab3\\src\\rs\\elfak\\darko_velickovic\\Index\\";
@@ -138,7 +111,7 @@ public class Search {
     public List<String> searchBool(long lowLine, long hightLine){
         try{
             Directory dir = FSDirectory.open(new File(indexDirectoryPath).toPath());
-
+ 
             IndexReader reader = DirectoryReader.open(dir);
             IndexSearcher searcher = new IndexSearcher(reader);
             
@@ -190,6 +163,32 @@ public class Search {
         }
         catch(Exception e)
         {
+           System.err.println(e.toString());
+        }
+    }
+    
+    public void addDocument(String fileName, String paragraphContent, int paragraphNumber){
+        try{
+            Directory dir = FSDirectory.open(new File(indexDirectoryPath).toPath());
+            IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
+            config.setSimilarity(new ClassicSimilarity());
+            IndexWriter writer = new IndexWriter(dir, config);
+            Document doc = new Document();
+            
+            FieldType textType = new FieldType(TextField.TYPE_STORED);
+            textType.setStored(true);
+            textType.setStoreTermVectors(true);
+            textType.setStoreTermVectorOffsets(true);
+            
+            String paragraphName = fileName + "#" + paragraphNumber;
+            
+            doc.add(new Field(TITLE, paragraphName, textType));
+            doc.add(new Field(CONTENT, paragraphContent, textType));
+            writer.addDocument(doc);
+            writer.close();
+            dir.close();
+        }
+        catch(Exception e){
            System.err.println(e.toString());
         }
     }
@@ -266,9 +265,10 @@ public class Search {
             searcher.search(q, collector);
             TopDocs docs = collector.topDocs();
             List<String> ret = new ArrayList<>();
-            for(int i = 0; i < docs.totalHits; i++){
+            for(int i = 0; i < 1; i++){
                 Document d = reader.document(docs.scoreDocs[i].doc);
                 ret.add(d.get(category)+ ", " + d.get(SIZE) + ", score: " + docs.scoreDocs[i].score);
+                ret.add(d.get(CONTENT));
             }
             reader.close();
             dir.close();
@@ -285,18 +285,15 @@ public class Search {
         ArrayList<String> list = new ArrayList<>();
         for (final File fileEntry : folder.listFiles()) {
             if (!fileEntry.isDirectory()) {
-                if(fileEntry.getName().endsWith(".txt"))
+                if(fileEntry.getName().endsWith(".txt")){
                     list.add(fileEntry.getName());
+                }
             }
         }
         for(int i = 0; i < list.size(); i++){
             String fileName = list.get(i).split(".txt")[0];
-            if(searchByCategory(fileName, TITLE, true).isEmpty()){
-            	addDocument(fileName, docDir + list.get(i));
-            	System.out.format("Document added.Status :[%d / %d]%n", i,list.size());
-            }
-                
-            
+            //addDocument(fileName, docDir + list.get(i));
+            System.out.format("Document added.Status :[%d / %d]%n", i,list.size());
         }
     }
    
@@ -358,7 +355,6 @@ public class Search {
             return null;
         }
     }
-    
     
     public void getTFIDF(String query)
     {
@@ -465,6 +461,63 @@ public class Search {
             return docId;
         }
     }
+    
+	private String[] readFile(String path, Charset encoding) throws IOException {
+		byte[] encoded = Files.readAllBytes(Paths.get(path));
+		String document = new String(encoded, encoding);
+		String lines[] = document.split("\n");
+		return lines;
+	}
+  
+	public List<String> parseDocument(String docDir, String folderForParagraphs, boolean clean) {
+		File folder = new File(docDir);
+		File paraFolder = new File(folderForParagraphs);
+		if (clean) {
+			System.out.println("Cleaning started.");
+			for (final File file : paraFolder.listFiles()) {
+				file.delete();
+				System.out.println("Document : " + file.getName() + " deleted.");
+			}
+		}
+		System.out.println("Cleaning done.");
+		ArrayList<String> list = new ArrayList<>();
+		int docCounter = 0;
+		int paragraphCounter = 0;
+		for (final File fileEntry : folder.listFiles()) {
+			if (!fileEntry.isDirectory()) {
+				if (fileEntry.getName().endsWith(".txt")) {
+					try {
+						System.out.println("=================================================");
+						String[] paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
+						//BufferedWriter bw = null;
+						for (int i = 0; i < paragraphed.length; i++) {
+							/*
+							 * String fileWhereToWrite =
+							 * fileEntry.getName().replaceAll(
+							 * " - Wikipedia, the free encyclopedia",
+							 * "#"+String.valueOf(i)); File file = new
+							 * File(folderForParagraphs+fileWhereToWrite); // if
+							 * file doesn't exists, then create it if
+							 * (!file.exists()) file.createNewFile(); FileWriter
+							 * fw = new FileWriter(file.getAbsoluteFile()); bw =
+							 * new BufferedWriter(fw); System.out.println(
+							 * "Paragraph : "+ paragraphed[i]);
+							 * bw.write(paragraphed[i]); bw.close();
+							 */
+							this.addDocument(fileEntry.getName(), paragraphed[i], paragraphCounter);
+							paragraphCounter++;
+						}
+						System.out.println("[ " + docCounter + " : " + folder.list().length + "]");
+						docCounter++;
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return list;
+	}
     
 }
     
