@@ -25,6 +25,7 @@ import org.apache.lucene.store.FSDirectory;
 public class IndexMaker{
 	
 	public static ArrayList<Integer> numberOfDoc = new ArrayList<>();
+	public static ArrayList<Integer> parCount = new ArrayList<>();
 	
 	private static List<Integer> prepearDir(String docDir){
 		List<Integer> ret = new ArrayList<>();
@@ -46,7 +47,7 @@ public class IndexMaker{
 		List<Integer> indexList = prepearDir(docDir);
 			
 		for(int i = 0; i < indexList.size(); i++){
-			//System.out.println(indexList.get(i) + ", " + indexList.size());
+			System.out.println(indexList.get(i) + ", " + indexList.size());
 			if(i != indexList.size() - 1)
 				new IndexThread(docDir, indexDir, indexList.get(i), indexList.get(i + 1), i).run();
 			else

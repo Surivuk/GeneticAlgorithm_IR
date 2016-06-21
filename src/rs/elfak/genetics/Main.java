@@ -14,7 +14,7 @@ public class Main {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		Search searchEngine = new Search("/Volumes//Disc 2 /Projekti/PI_Data/Data/Paragraphed/", false);
+		/*Search searchEngine = new Search("/Volumes//Disc 2 /Projekti/PI_Data/Data/Paragraphed/", false);
 		
 		List<String> tmp = searchEngine.searchByCategory("Z22 (computer) - Wikipedia, the free encyclopedia", Search.TITLE, true);
 		
@@ -22,17 +22,22 @@ public class Main {
 			for(int i = 0; i < tmp.size(); i++){
 				System.out.println(tmp.get(i));
 			}
-		}
+		}*/
 		
-		/*IndexMaker.start("/Volumes//Disc 2 /Projekti/PI_Data/Data/Crawler_Data/", "/Volumes/Disc 2 /Projekti/PI_Data/Index/");
+		IndexMaker.start("/Volumes//Disc 2 /Projekti/PI_Data/Data/Crawler_Data/", "/Volumes/Disc 2 /Projekti/PI_Data/Index/");
 		
 		int sum = 0;
 		for(int i = 0; i < IndexMaker.numberOfDoc.size(); i++){
-			//System.out.println(IndexMaker.numberOfDoc.get(i));
+			System.out.println(IndexMaker.numberOfDoc.get(i));
 			sum += IndexMaker.numberOfDoc.get(i);
-		}*/
-		
-		//System.out.println("Indeksirano: " + sum + " dokumenta!");
+		}
+		System.out.println("Indeksirano: " + sum + " dokumenta!");
+		sum = 0;
+		for(int i = 0; i < IndexMaker.parCount.size(); i++){
+			//System.out.println(IndexMaker.numberOfDoc.get(i));
+			sum += IndexMaker.parCount.get(i);
+		}
+		System.out.println("Par: " + sum);
 		
 	}
 

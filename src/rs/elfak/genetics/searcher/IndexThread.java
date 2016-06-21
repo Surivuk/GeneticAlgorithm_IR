@@ -48,10 +48,11 @@ public class IndexThread extends Thread{
 	}
 	
 	private String[] readFile(String path, Charset encoding) throws IOException {
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
-		String document = new String(encoded, encoding);
-		String lines[] = document.split("\n");
-		return lines;
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        String document = new String(encoded, encoding);
+        String document2 = document.replaceAll("\n{2}", "\n");
+        String lines[] = document2.split("\n");
+        return lines;
 	}
   
 	public void parseDocument(String docDir, int statIndex, int stopIndex, int threadNum){
@@ -76,7 +77,6 @@ public class IndexThread extends Thread{
 				IndexWriter writer = new IndexWriter(dir, config);
 				
 				File folder = new File(docDir);
-				int len = folder.list().length;
 				int docCounter = 0;
 				int paragraphCounter = 0;
 				for (int iFile = statIndex; iFile < stopIndex; iFile++) {
@@ -85,12 +85,13 @@ public class IndexThread extends Thread{
 						if (fileEntry.getName().endsWith(".txt")) {
 							try {
 								String[] paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
+								paragraphCounter = 0;
 								for (int i = 0; i < paragraphed.length; i++) {
 									String paragraphName = fileEntry.getName() + "#" + i;
 									addDoc(paragraphName, paragraphed[i], writer);
 									paragraphCounter++;
 								}
-								//System.out.println("[ " + docCounter + " : " + len + "]");
+								IndexMaker.parCount.add(paragraphCounter);
 								docCounter++;
 							} catch (IOException e) {
 								e.printStackTrace();
@@ -99,19 +100,7 @@ public class IndexThread extends Thread{
 					}
 				}
 				IndexMaker.numberOfDoc.add(docCounter);
-				/*File source = new File(indexDir + "/" + threadNum + "/");
-				//File dest = new File(indexDir);
-				try{
-					//FileUtils.copyDirectory(source, dest);
-					//FileUtils.cleanDirectory(source); 
-					//source.delete();
-				}
-				catch(IOException e){
-					e.printStackTrace();
-				}*/
-				
-				
-				
+
 				writer.close();
 				dir.close();
 			}
