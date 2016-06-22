@@ -1,6 +1,8 @@
 package rs.elfak.genetics.searcher;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -47,29 +49,64 @@ public class IndexThread extends Thread{
 		return this.docDir;
 	}
 	
-	private String[] readFile(String path, Charset encoding) throws IOException {
+	private List<String> readFile(String path, Charset encoding) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         String document = new String(encoded, encoding);
         String document2 = document.replaceAll("\n{2}", "\n");
-        String lines[] = document2.split("\n");
-        return lines;
+        String lines[] = document2.split("\\r?\\n");
+        List<String> ret = new ArrayList<>();
+        for(int i = 0; i < lines.length; i++){
+        	if(!lines[i].isEmpty() && !lines[i].equals("\r"))
+        		if(lines[i].contains(" ") && lines[i].length() >= 5)
+        			ret.add(lines[i]);
+        }
+        return ret;
 	}
   
-	public void parseDocument(String docDir, int statIndex, int stopIndex, int threadNum){
+	public int oneT(String docDir){
+        try{
+        	Directory dir = FSDirectory.open(new File(indexDir).toPath());
+        	IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
+        	config.setSimilarity(new ClassicSimilarity());
+        	IndexWriter writer = new IndexWriter(dir, config);
+        	
+        	File folder = new File(docDir);
+			int docCounter = 0;
+			int parCount = 0;
+			for (int iFile = 0; iFile < folder.listFiles().length; iFile++) {
+				File fileEntry = folder.listFiles()[iFile];
+				if (!fileEntry.isDirectory()) {
+					if (fileEntry.getName().endsWith(".txt")) {
+						try {
+							List<String> paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
+							for (int i = 0; i < paragraphed.size(); i++) {
+								String paragraphName = fileEntry.getName() + "#" + i;
+								addDoc(paragraphName, paragraphed.get(i), writer);
+								parCount++;
+							}
+							docCounter++;
+						} 
+						catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				IndexMaker.numberOfDoc.add(docCounter);
 
+				writer.close();
+				dir.close();
+				return parCount;
+			}
+        }
+        catch(Exception e){
+           System.err.println(e.toString());
+        }
+        return -1;
 	}
 	
     private void addDocument(String docDir, int statIndex, int stopIndex, int threadNum){
         try{
         	boolean work = true;
-			/*File dirPart = new File(indexDir + "/" + threadNum + "/");
-			if (!dirPart.exists()) {
-				if(dirPart.mkdir())
-					work = true;
-			}
-			else
-				work = true;*/
-			
 			if(work){
 				Directory dir = FSDirectory.open(new File(indexDir).toPath());
 				IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
@@ -78,20 +115,17 @@ public class IndexThread extends Thread{
 				
 				File folder = new File(docDir);
 				int docCounter = 0;
-				int paragraphCounter = 0;
 				for (int iFile = statIndex; iFile < stopIndex; iFile++) {
 					File fileEntry = folder.listFiles()[iFile];
 					if (!fileEntry.isDirectory()) {
 						if (fileEntry.getName().endsWith(".txt")) {
 							try {
-								String[] paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
-								paragraphCounter = 0;
-								for (int i = 0; i < paragraphed.length; i++) {
+								List<String> paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
+								for (int i = 0; i < paragraphed.size(); i++) {
 									String paragraphName = fileEntry.getName() + "#" + i;
-									addDoc(paragraphName, paragraphed[i], writer);
-									paragraphCounter++;
+									addDoc(paragraphName, paragraphed.get(i), writer);
+									IndexMaker.parCount.add(1);
 								}
-								IndexMaker.parCount.add(paragraphCounter);
 								docCounter++;
 							} catch (IOException e) {
 								e.printStackTrace();
@@ -124,6 +158,61 @@ public class IndexThread extends Thread{
 	@Override
 	public void run() {
 		addDocument(docDir, startIndex, stopIndex, threadNumber);
+	}
+	
+	public List<String> parseDocument(String docDir, String folderForParagraphs, boolean clean) {
+		File folder = new File(docDir);
+		File paraFolder = new File(folderForParagraphs);
+
+		if (clean) {
+			System.out.println("Cleaning started.");
+			for (final File file : paraFolder.listFiles()) {
+				file.delete();
+				System.out.println("Document : " + file.getName() + " deleted.");
+			}
+		}
+		System.out.println("Cleaning done.");
+
+		ArrayList<String> list = new ArrayList<>();
+
+		for (final File fileEntry : folder.listFiles()) {
+			if (!fileEntry.isDirectory()) {
+				if (fileEntry.getName().endsWith(".txt")) {
+					try {
+						System.out.println("=================================================");
+						List<String> paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
+						BufferedWriter bw = null;
+						for (int i = 0; i < paragraphed.size(); i++) {
+
+							String fileWhereToWrite = fileEntry.getName()
+									.replaceAll(" - Wikipedia, the free encyclopedia", "#" + String.valueOf(i));
+
+							File file = new File(folderForParagraphs + fileWhereToWrite);
+
+							// if file doesn't exists, then create it
+							if (!file.exists()) {
+								file.createNewFile();
+							}
+
+							FileWriter fw = new FileWriter(file.getAbsoluteFile());
+							bw = new BufferedWriter(fw);
+							System.out.println("Paragraph : " + paragraphed.get(i));
+							bw.write(paragraphed.get(i));
+							bw.close();
+
+						}
+						System.out.println("Document : " + fileEntry.getName() + " split end written into : "
+								+ folderForParagraphs);
+
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
+			}
+		}
+		return list;
 	}
 
 }

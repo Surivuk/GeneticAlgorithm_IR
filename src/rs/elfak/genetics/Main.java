@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import com.sun.org.apache.xerces.internal.util.URI;
 
 import rs.elfak.genetics.searcher.IndexMaker;
+import rs.elfak.genetics.searcher.IndexThread;
 import rs.elfak.genetics.searcher.Search;
 
 public class Main {
@@ -24,20 +25,10 @@ public class Main {
 			}
 		}*/
 		
-		IndexMaker.start("/Volumes//Disc 2 /Projekti/PI_Data/Data/Crawler_Data/", "/Volumes/Disc 2 /Projekti/PI_Data/Index/");
-		
-		int sum = 0;
-		for(int i = 0; i < IndexMaker.numberOfDoc.size(); i++){
-			System.out.println(IndexMaker.numberOfDoc.get(i));
-			sum += IndexMaker.numberOfDoc.get(i);
-		}
-		System.out.println("Indeksirano: " + sum + " dokumenta!");
-		sum = 0;
-		for(int i = 0; i < IndexMaker.parCount.size(); i++){
-			//System.out.println(IndexMaker.numberOfDoc.get(i));
-			sum += IndexMaker.parCount.get(i);
-		}
+		Search searchEngine = new Search("/Volumes/Disc 2 /Projekti/PI_Data/Data/Paragraphed/", false);
+		int sum = searchEngine.indexCorpus("/Volumes/Disc 2 /Projekti/PI_Data/Data/Crawler_Data/", "/Volumes/Disc 2 /Projekti/PI_Data/Index/");
 		System.out.println("Par: " + sum);
+
 		
 	}
 
