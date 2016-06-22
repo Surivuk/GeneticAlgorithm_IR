@@ -26,6 +26,7 @@ public class IndexMaker{
 	
 	public static ArrayList<Integer> numberOfDoc = new ArrayList<>();
 	public static ArrayList<Integer> parCount = new ArrayList<>();
+	public static int paragraphCounter = 0;
 	
 	private static List<Integer> prepearDir(String docDir){
 		List<Integer> ret = new ArrayList<>();

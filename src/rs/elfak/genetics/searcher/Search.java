@@ -7,8 +7,10 @@ package rs.elfak.genetics.searcher;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -461,63 +463,94 @@ public class Search {
             return docId;
         }
     }
-    
-	private String[] readFile(String path, Charset encoding) throws IOException {
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
-		String document = new String(encoded, encoding);
-		String lines[] = document.split("\n");
-		return lines;
+	
+	private List<String> readFile(String path, Charset encoding) throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        String document = new String(encoded, encoding);
+        String document2 = document.replaceAll("\n{2}", "\n");
+        String lines[] = document2.split("\\r?\\n");
+        List<String> ret = new ArrayList<>();
+        for(int i = 0; i < lines.length; i++){
+        	if(!lines[i].isEmpty() && !lines[i].equals("\r"))
+        		if(lines[i].contains(" ") && lines[i].length() >= 10)
+        			ret.add(lines[i]);
+        }
+        return ret;
 	}
-  
-	public List<String> parseDocument(String docDir, String folderForParagraphs, boolean clean) {
-		File folder = new File(docDir);
-		File paraFolder = new File(folderForParagraphs);
-		if (clean) {
-			System.out.println("Cleaning started.");
-			for (final File file : paraFolder.listFiles()) {
-				file.delete();
-				System.out.println("Document : " + file.getName() + " deleted.");
-			}
-		}
-		System.out.println("Cleaning done.");
-		ArrayList<String> list = new ArrayList<>();
-		int docCounter = 0;
-		int paragraphCounter = 0;
-		for (final File fileEntry : folder.listFiles()) {
-			if (!fileEntry.isDirectory()) {
-				if (fileEntry.getName().endsWith(".txt")) {
-					try {
-						System.out.println("=================================================");
-						String[] paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
-						//BufferedWriter bw = null;
-						for (int i = 0; i < paragraphed.length; i++) {
-							/*
-							 * String fileWhereToWrite =
-							 * fileEntry.getName().replaceAll(
-							 * " - Wikipedia, the free encyclopedia",
-							 * "#"+String.valueOf(i)); File file = new
-							 * File(folderForParagraphs+fileWhereToWrite); // if
-							 * file doesn't exists, then create it if
-							 * (!file.exists()) file.createNewFile(); FileWriter
-							 * fw = new FileWriter(file.getAbsoluteFile()); bw =
-							 * new BufferedWriter(fw); System.out.println(
-							 * "Paragraph : "+ paragraphed[i]);
-							 * bw.write(paragraphed[i]); bw.close();
-							 */
-							this.addDocument(fileEntry.getName(), paragraphed[i], paragraphCounter);
-							paragraphCounter++;
+	
+	public int indexCorpus(String docDir, String indexDir){
+        try{
+    		/*PrintStream out = new PrintStream(new FileOutputStream("/Volumes/Disc 2 /Projekti/out.txt"));
+    		System.setOut(out);*/
+        	
+        	String folderPath = "/Volumes/Disc 2 /Projekti/PI_Data/Test2/";
+    		
+        	Directory dir = FSDirectory.open(new File(indexDir).toPath());
+        	IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
+        	config.setSimilarity(new ClassicSimilarity());
+        	IndexWriter writer = new IndexWriter(dir, config);
+        	
+        	File folder = new File(docDir);
+			int docCounter = 0;
+			int parCount = 0;
+			for (int iFile = 0; iFile < folder.listFiles().length; iFile++) {
+				File fileEntry = folder.listFiles()[iFile];
+				if (!fileEntry.isDirectory()) {
+					if (fileEntry.getName().endsWith(".txt")) {
+						try {
+							List<String> paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
+							BufferedWriter bw = null;
+							for (int i = 0; i < paragraphed.size(); i++) {
+								String paragraphName = fileEntry.getName() + "#" + i;
+								addDoc(paragraphName, paragraphed.get(i), writer);
+								
+								String fileWhereToWrite = fileEntry.getName().replaceAll(" - Wikipedia, the free encyclopedia", "#"+String.valueOf(i));
+								
+								File file = new File(folderPath +fileWhereToWrite);
+
+								// if file doesn't exists, then create it
+								if (!file.exists()) {
+									file.createNewFile();
+								}
+
+								FileWriter fw = new FileWriter(file.getAbsoluteFile());
+								bw = new BufferedWriter(fw);
+								//System.out.println("Paragraph : "+ paragraphed.get(i));
+								bw.write(paragraphed.get(i));
+								bw.close();
+								
+								
+								parCount++;
+							}
+							docCounter++;
+						} 
+						catch (IOException e) {
+							e.printStackTrace();
 						}
-						System.out.println("[ " + docCounter + " : " + folder.list().length + "]");
-						docCounter++;
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
 				}
+				IndexMaker.numberOfDoc.add(docCounter);
 			}
-		}
-		return list;
+			writer.close();
+			dir.close();
+			return parCount;
+        }
+        catch(Exception e){
+           System.err.println(e.toString());
+        }
+        return -1;
 	}
+	
+    private void addDoc(String paragraphName, String paragraphContent, IndexWriter writer) throws IOException{
+    	Document doc = new Document();
+		FieldType textType = new FieldType(TextField.TYPE_STORED);
+		textType.setStored(true);
+		textType.setStoreTermVectors(true);
+		textType.setStoreTermVectorOffsets(true);
+		doc.add(new Field(TITLE, paragraphName, textType));
+		doc.add(new Field(CONTENT, paragraphContent, textType));
+		writer.addDocument(doc);
+    }
     
 }
     
