@@ -482,6 +482,8 @@ public class Search {
         try{
     		/*PrintStream out = new PrintStream(new FileOutputStream("/Volumes/Disc 2 /Projekti/out.txt"));
     		System.setOut(out);*/
+        	
+        	String folderPath = "/Volumes/Disc 2 /Projekti/PI_Data/Test2/";
     		
         	Directory dir = FSDirectory.open(new File(indexDir).toPath());
         	IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
@@ -497,12 +499,29 @@ public class Search {
 					if (fileEntry.getName().endsWith(".txt")) {
 						try {
 							List<String> paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
+							BufferedWriter bw = null;
 							for (int i = 0; i < paragraphed.size(); i++) {
 								String paragraphName = fileEntry.getName() + "#" + i;
 								addDoc(paragraphName, paragraphed.get(i), writer);
-								//System.out.println("-------------------------\n" + paragraphed.get(i));
+								
+								String fileWhereToWrite = fileEntry.getName().replaceAll(" - Wikipedia, the free encyclopedia", "#"+String.valueOf(i));
+								
+								File file = new File(folderPath +fileWhereToWrite);
+
+								// if file doesn't exists, then create it
+								if (!file.exists()) {
+									file.createNewFile();
+								}
+
+								FileWriter fw = new FileWriter(file.getAbsoluteFile());
+								bw = new BufferedWriter(fw);
+								//System.out.println("Paragraph : "+ paragraphed.get(i));
+								bw.write(paragraphed.get(i));
+								bw.close();
+								
+								
+								parCount++;
 							}
-							parCount += paragraphed.size();
 							docCounter++;
 						} 
 						catch (IOException e) {

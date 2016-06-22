@@ -15,7 +15,7 @@ public class Main {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		/*Search searchEngine = new Search("/Volumes//Disc 2 /Projekti/PI_Data/Data/Paragraphed/", false);
+		Search searchEngine = new Search("/Volumes/Disc 2 /Projekti/PI_Data/Data/Crawler_Data/", false);
 		
 		List<String> tmp = searchEngine.searchByCategory("Z22 (computer) - Wikipedia, the free encyclopedia", Search.TITLE, true);
 		
@@ -23,11 +23,11 @@ public class Main {
 			for(int i = 0; i < tmp.size(); i++){
 				System.out.println(tmp.get(i));
 			}
-		}*/
+		}
 		
-		Search searchEngine = new Search("/Volumes/Disc 2 /Projekti/PI_Data/Data/Paragraphed/", false);
+		/*Search searchEngine = new Search("/Volumes/Disc 2 /Projekti/PI_Data/Data/Paragraphed/", false);
 		int sum = searchEngine.indexCorpus("/Volumes/Disc 2 /Projekti/PI_Data/Data/Crawler_Data/", "/Volumes/Disc 2 /Projekti/PI_Data/Index/");
-		System.out.println("Par: " + sum);
+		System.out.println("Par: " + sum);*/
 
 		
 	}
