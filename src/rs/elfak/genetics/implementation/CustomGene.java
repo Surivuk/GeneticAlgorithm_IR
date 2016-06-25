@@ -7,6 +7,7 @@ import rs.elfak.genetics.coreAPI.Gene;
 public class CustomGene extends Gene{
 	
 	public CustomGene() {
+		super(0,null);
 		Random r = new Random();
 
 	    String alphabet = "qwertyuiopasdfghjklzxcvbnm";
@@ -17,12 +18,13 @@ public class CustomGene extends Gene{
 	}
 	
 	public CustomGene(char character) {
+		super(0,character);
 		this.setValue(character);
 	}
 	
 	@Override
 	public void MutateGene() {
-		if(this.cost == 0){
+		//if(this.cost == 0){
 			Random r = new Random();
 
 		    String alphabet = "qwertyuiopasdfghjklzxcvbnm";
@@ -30,7 +32,7 @@ public class CustomGene extends Gene{
 		    char value = alphabet.charAt(r.nextInt(alphabet.length()));
 		    
 		    this.setValue(value);
-		}
+		//}
 	}
 
 	@Override

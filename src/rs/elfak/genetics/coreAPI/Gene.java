@@ -5,6 +5,12 @@ public abstract class Gene {
 	protected double cost;
 	protected Object value;
 	
+	public Gene(double cost,Object value)
+	{
+		this.cost = cost;
+		this.value = value;
+	}
+	
 	public void setCost(double cost){
 		this.cost = cost;
 	}

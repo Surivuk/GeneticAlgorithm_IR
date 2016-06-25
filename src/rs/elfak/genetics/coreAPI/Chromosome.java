@@ -1,9 +1,10 @@
 package rs.elfak.genetics.coreAPI;
 
 import java.util.List;
+import java.util.Random;
 import java.util.ArrayList;
 
-public class Chromosome {
+public abstract class Chromosome {
 	
 	public String logicName;
 	protected double cost;
@@ -20,7 +21,7 @@ public class Chromosome {
 		return sum;
 	}
 	
-	public void setGene(Gene value){
+	public void addGene(Gene value){
 		genes.add(value);
 	}
 	
@@ -30,11 +31,24 @@ public class Chromosome {
 		else 
 			return null;
 	}
-	
-
+	public boolean setGene(int index,Gene g1)
+	{
+		if(index >= 0 && index < genes.size())
+		{
+			genes.set(index, g1);
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	public int geneCount()
+	{
+		return genes.size();
+	}
 	public void MutateGenes(){
-		int index = (int)(Math.random() * 10);
-		index = index  % genes.size();
+		Random rand = new Random();
+		int index = rand.nextInt(genes.size());
 		genes.get(index).MutateGene();
 	}
 	
@@ -66,12 +80,15 @@ public class Chromosome {
 	}
 	
 	public void printContent(){
-		String msg = logicName + "'s contents are : ";
-		for(int i = 0 ; i < genes.size(); i++)
+		
+		String msg = "";
+		msg += "Cost: "+String.valueOf(getCost())+"\t";
+		msg += logicName + "'s contents are : ";
+		/*for(int i = 0 ; i < genes.size(); i++)
 		{
 			msg += genes.get(i).ShowResult() + "\t";
-		}
-		msg += "\tCost: "+String.valueOf(getCost());
+		}*/
+		
 		System.out.println(msg);
 	}
 }

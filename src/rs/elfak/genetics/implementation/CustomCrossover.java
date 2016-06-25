@@ -6,8 +6,8 @@ import java.util.Random;
 import rs.elfak.genetics.coreAPI.Chromosome;
 import rs.elfak.genetics.coreAPI.IMatingStrategy;
 
-public class Crossover implements IMatingStrategy {
-	
+public class CustomCrossover implements IMatingStrategy {
+
 	private Chromosome MT_father,
 	MT_mother,
 	MT_child1,
@@ -23,7 +23,7 @@ public class Crossover implements IMatingStrategy {
 	
 	private static int counter = 0;
 	
-	public Crossover(/*ArrayList<Chromosome> population,int numGenes,int numChromes*/)
+	public CustomCrossover(/*ArrayList<Chromosome> population,int numGenes,int numChromes*/)
 	{
 		/*MT_posFather = 0;
 		MT_posMother = 1;
@@ -43,17 +43,20 @@ public class Crossover implements IMatingStrategy {
 	@Override
 	public ArrayList<Chromosome> Mate(ArrayList<Chromosome> population,int numGenes, int numPairs) {
 		
-		MT_posFather = 0;
-		MT_posMother = 1;
+		int LMT_posFather = 0;
+		int LMT_posMother = 1;
 		MT_numGenes = numGenes;
 		for(int j = 0 ; j < numPairs; j++)
 		{
-			MT_father = population.get(MT_posFather);
-			MT_mother = population.get(MT_posMother);
-			MT_child1 = new DocumentChromosome("");
-			MT_child2 = new DocumentChromosome("");
+			MT_father = population.get(LMT_posFather);
+			MT_mother = population.get(LMT_posMother);
+			
+			MT_child1 = new CustomChromosome();
+			MT_child2 = new CustomChromosome();
+			
 			MT_child1.logicName = MT_father.logicName.charAt(MT_father.logicName.length()-1) + " " + MT_mother.logicName.charAt(MT_mother.logicName.length()-1);
-			MT_child2.logicName = MT_mother.logicName.charAt(MT_mother.logicName.length()-1) + " " + MT_father.logicName.charAt(MT_father.logicName.length()-1) ;
+			MT_child2.logicName = MT_mother.logicName.charAt(MT_mother.logicName.length()-1) + " " + MT_father.logicName.charAt(MT_father.logicName.length()-1);
+			
 			Random rnum = new Random();
 			int crossPoint = rnum.nextInt(MT_numGenes);
 			
@@ -72,10 +75,10 @@ public class Crossover implements IMatingStrategy {
 			population.add(MT_child1);
 			population.add(MT_child2);
 			
-			MT_posChild1 = MT_posChild1 + 2;
-			MT_posChild2 = MT_posChild2 + 2;
-			MT_posFather = MT_posFather + 2;
-			MT_posMother = MT_posMother + 2;
+			//MT_posChild1 = MT_posChild1 + 2;
+			//MT_posChild2 = MT_posChild2 + 2;
+			LMT_posFather = LMT_posFather + 2;
+			LMT_posMother = LMT_posMother + 2;
 			
 			
 			                                                                                                         
@@ -83,5 +86,13 @@ public class Crossover implements IMatingStrategy {
 		}
 		return population;
 	}
-
+	
+	public ArrayList<Chromosome> Mate2(ArrayList<Chromosome> population,int numGenes, int numPairs) 
+	{
+		ArrayList<Chromosome> ret = new ArrayList<>();
+		
+		
+		
+		return ret;
+	}
 }

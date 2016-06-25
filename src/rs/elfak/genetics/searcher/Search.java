@@ -45,6 +45,9 @@ import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.apache.lucene.util.BytesRef;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
+
+import rs.elfak.genetics.implementation.ParagraphGene;
+
 import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.BooleanQuery.Builder;
 
@@ -55,6 +58,7 @@ import org.apache.lucene.search.BooleanQuery.Builder;
 
 import org.apache.lucene.index.Fields;
 import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.TermStatistics;
 
@@ -88,7 +92,7 @@ public class Search {
     public Search(String docDir, Boolean htmlIndexing){
     	if(!htmlIndexing)
     	{
-    		indexDirectoryPath = "/Volumes/Disc 2 /Projekti/PI_Data/Index/";
+    		indexDirectoryPath = "D:\\Index2\\";
             docDirectoryPath = docDir;
             analyzer = new StandardAnalyzer();
             //loadAllDocs(docDir);
@@ -105,11 +109,7 @@ public class Search {
             
     	}
     }
-    public String testParser()
-    {
-    	return new String("la");
-    }
-    
+
     public List<String> searchBool(long lowLine, long hightLine){
         try{
             Directory dir = FSDirectory.open(new File(indexDirectoryPath).toPath());
@@ -244,12 +244,12 @@ public class Search {
         }
         for(int i = 0; i < list.size(); i++){
             String fileName = list.get(i).split(".html")[0];
-            if(searchByCategory(fileName, TITLE, true).isEmpty())
+            if(searchByCategory(fileName, TITLE,100, true).isEmpty())
             	addHTMLDocument(docDir + list.get(i));
         }
     }
     
-    public List<String> searchByCategory(String searchingTerm, String category, boolean veryPrecision){
+    public List<ParagraphGene> searchByCategory(String searchingTerm, String category,int numberOfTopDocuments, boolean veryPrecision){
         try{
             Directory dir = FSDirectory.open(new File(indexDirectoryPath).toPath());
 
@@ -263,14 +263,15 @@ public class Search {
                 queryText += "*";
             Query q = parser.parse(queryText);
 
-            TopScoreDocCollector collector = TopScoreDocCollector.create(10);
+            TopScoreDocCollector collector = TopScoreDocCollector.create(numberOfTopDocuments);
             searcher.search(q, collector);
             TopDocs docs = collector.topDocs();
-            List<String> ret = new ArrayList<>();
-            for(int i = 0; i < 1; i++){
+            List<ParagraphGene> ret = new ArrayList<>();
+            for(int i = 0; i < docs.scoreDocs.length; i++){
                 Document d = reader.document(docs.scoreDocs[i].doc);
-                ret.add(d.get(category)+ ", " + d.get(SIZE) + ", score: " + docs.scoreDocs[i].score);
-                ret.add(d.get(CONTENT));
+                //ret.add(d.get(category)+ ", " + d.get(SIZE) + ", score: " + docs.scoreDocs[i].score);
+                //ret.add(d.get(TITLE));
+                ret.add(new ParagraphGene(d.get(TITLE),d.get(CONTENT),docs.scoreDocs[i].score));
             }
             reader.close();
             dir.close();
@@ -303,14 +304,14 @@ public class Search {
     	Boolean first = true;
     	Document firstHit = null;
         List<String> vector = processInput(vec);
-        HashMap<String, Long> map = new HashMap<>();
+        ArrayList<ParagraphGene> documents = new ArrayList<ParagraphGene>();
         try{
             Directory dir = FSDirectory.open(new File(indexDirectoryPath).toPath());
 
             IndexReader reader = DirectoryReader.open(dir);
             IndexSearcher searcher = new IndexSearcher(reader);
 
-            List<Integer> docId = getDocumentsFromVector(vector, reader, searcher);
+            List<Integer> docId = getDocumentsFromVector(vector, reader, searcher,100,BooleanClause.Occur.SHOULD);
             List<String> ret = new ArrayList<>();
             for(int i = 0; i < docId.size(); i++){
             	
@@ -358,25 +359,27 @@ public class Search {
         }
     }
     
-    public void getTFIDF(String query)
+    public ArrayList<ParagraphGene> getTFIDF(String query,int numTopDoc)
     {
-    	Boolean first = true;
-    	Document firstHit = null;
+    	//Boolean first = true;
+    	//Document firstHit = null;
+    	//String content = "";
         List<String> vector = processInput(query);
-        HashMap<String,Float> rating = new HashMap<>();
+       // HashMap<String,Float> rating = new HashMap<>();
         
-        HashMap<String, Long> map = new HashMap<>();
+        ArrayList<ParagraphGene> topParagraphsForQuery = new ArrayList<ParagraphGene>();
+        
         try{
             Directory dir = FSDirectory.open(new File(indexDirectoryPath).toPath());
 
             IndexReader reader = DirectoryReader.open(dir);
             IndexSearcher searcher = new IndexSearcher(reader);
             
-            List<Integer> docId = getDocumentsFromVector(vector, reader, searcher);
+            List<Integer> docId = getDocumentsFromVector(vector, reader, searcher,numTopDoc,BooleanClause.Occur.SHOULD);
             
             
             
-            List<String> ret = new ArrayList<>();
+            //List<String> ret = new ArrayList<>();
             for(int i = 0; i < docId.size(); i++){
             	
                 Fields ff = reader.getTermVectors(docId.get(i));
@@ -384,7 +387,7 @@ public class Search {
                 
                 TermsEnum te = terms.iterator();
                 Object tmp = te.next();
-                long counter = 0;
+                
                 while (tmp != null) {
                     BytesRef by = (BytesRef) tmp;
                     String term = by.utf8ToString();
@@ -406,26 +409,34 @@ public class Search {
                     Document d = reader.document(docId.get(i));
                     
                     if(vector.contains(term)){
+                    	//PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
+                    	//System.setOut(out);
+                    	
                         float ttt = sim.simScorer(sim.computeWeight(s, ts), reader.getContext().leaves().get(0)).score(docId.get(i), te.totalTermFreq());
-                        System.out.println(counter + ")" + ttt + ", " + d.get(TITLE) + ", term: " + term +", content:"+d.get(CONTENT));
-                        counter++;
-                        rating.put(d.get(TITLE), ttt);
+                        //content += String.valueOf(i) + ") " + ttt + ", " + d.get(TITLE) + ", term: " + term +", content:"+d.get(CONTENT) + "\n";
                         
+                        //rating.put(d.get(TITLE), ttt);
+                        ParagraphGene forTest = new ParagraphGene(d.get(TITLE),d.get(CONTENT),ttt);
+                        if(!topParagraphsForQuery.contains(forTest))
+                        {
+                        	topParagraphsForQuery.add(forTest);
+                        }
                         
-                        ret.add(d.get(TITLE));
+                        //ret.add(d.get(TITLE));
                         
                     }
                     tmp = te.next();
                 }
             }
-            //return ret;
-            
-            System.out.println(rating.toString());
+            return topParagraphsForQuery;
+            //System.out.println(content);
+            //System.out.println(rating.toString());
         }
         catch(Exception e){
         	e.printStackTrace();
-            //return null;
+            return null;
         }
+		//return rating;
         
         
     }
@@ -438,21 +449,21 @@ public class Search {
         return ret;
     }
     
-    private List<Integer> getDocumentsFromVector(List<String> vector, IndexReader reader, IndexSearcher searcher){
+    private List<Integer> getDocumentsFromVector(List<String> vector, IndexReader reader, IndexSearcher searcher,int topDocNumber,Occur ocur){
         List<Integer> docId = new ArrayList<>() ;
         try{
             Builder builder = new BooleanQuery.Builder();
             for (int i = 0; i < vector.size(); i++) {
                 QueryParser parser = new QueryParser(CONTENT, analyzer);
                 Query q = parser.parse(vector.get(i).toLowerCase());
-                builder.add(q, BooleanClause.Occur.SHOULD);
+                builder.add(q, ocur);
             }
             Query queryForSearching = builder.build();
 
-            TopScoreDocCollector collector = TopScoreDocCollector.create(100);
+            TopScoreDocCollector collector = TopScoreDocCollector.create(topDocNumber);
             searcher.search(queryForSearching, collector);
             TopDocs docs = collector.topDocs();
-            for (int i = 0; i < docs.totalHits; i++) {
+            for (int i = 0; i < docs.scoreDocs.length; i++) {
                 if(!docId.contains(docs.scoreDocs[i].doc))
                     docId.add(docs.scoreDocs[i].doc);
             }
@@ -464,16 +475,38 @@ public class Search {
         }
     }
 	
-	private List<String> readFile(String path, Charset encoding) throws IOException {
+	public List<String> readFile(String path, Charset encoding) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         String document = new String(encoded, encoding);
+        
         String document2 = document.replaceAll("\n{2}", "\n");
-        String lines[] = document2.split("\\r?\\n");
+        
+        int count = 0;
+        for(int i = 0 ; i < document2.length(); i++)
+        {
+        	if( document2.charAt(i) == '\n')
+        	{
+        		count++;
+        	}
+        }
+        
+        String lines[] = document2.split("\n");
+        
+        if(count != lines.length)
+        {
+        	System.out.println("New line number and number of paragraphs dont match.Document : "+ path);
+        }
+        
         List<String> ret = new ArrayList<>();
         for(int i = 0; i < lines.length; i++){
         	if(!lines[i].isEmpty() && !lines[i].equals("\r"))
-        		if(lines[i].contains(" ") && lines[i].length() >= 10)
-        			ret.add(lines[i]);
+        	{
+        		ret.add(lines[i]);
+        	}
+        	else{
+        		System.out.println("Skipped document in readFile function.Empty or contains one char.");
+        	}
+        			
         }
         return ret;
 	}
@@ -483,7 +516,7 @@ public class Search {
     		/*PrintStream out = new PrintStream(new FileOutputStream("/Volumes/Disc 2 /Projekti/out.txt"));
     		System.setOut(out);*/
         	
-        	String folderPath = "/Volumes/Disc 2 /Projekti/PI_Data/Test2/";
+        	String folderPath = "D:\\Paragrafi\\";
     		
         	Directory dir = FSDirectory.open(new File(indexDir).toPath());
         	IndexWriterConfig config = new IndexWriterConfig(this.analyzer);
@@ -498,6 +531,7 @@ public class Search {
 				if (!fileEntry.isDirectory()) {
 					if (fileEntry.getName().endsWith(".txt")) {
 						try {
+							
 							List<String> paragraphed = readFile(fileEntry.getPath(), StandardCharsets.UTF_8);
 							BufferedWriter bw = null;
 							for (int i = 0; i < paragraphed.size(); i++) {
@@ -551,6 +585,7 @@ public class Search {
 		doc.add(new Field(CONTENT, paragraphContent, textType));
 		writer.addDocument(doc);
     }
+    
     
 }
     

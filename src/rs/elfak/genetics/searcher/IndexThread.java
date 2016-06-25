@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -57,7 +56,7 @@ public class IndexThread extends Thread{
         List<String> ret = new ArrayList<>();
         for(int i = 0; i < lines.length; i++){
         	if(!lines[i].isEmpty() && !lines[i].equals("\r"))
-        		if(lines[i].contains(" ") && lines[i].length() >= 5)
+        		//if(lines[i].contains(" ") && lines[i].length() >= 5)
         			ret.add(lines[i]);
         }
         return ret;
