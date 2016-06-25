@@ -42,9 +42,13 @@ public class CustomCrossover implements IMatingStrategy {
 	
 	@Override
 	public ArrayList<Chromosome> Mate(ArrayList<Chromosome> population,int numGenes, int numPairs) {
-		
-		int LMT_posFather = 0;
-		int LMT_posMother = 1;
+		Random r = new Random();
+		int LMT_posFather = r.nextInt(population.size());
+		int LMT_posMother = r.nextInt(population.size());
+		while(LMT_posFather == LMT_posMother){
+			LMT_posFather = r.nextInt(population.size());
+			LMT_posMother = r.nextInt(population.size());
+		}
 		MT_numGenes = numGenes;
 		for(int j = 0 ; j < numPairs; j++)
 		{
@@ -77,8 +81,8 @@ public class CustomCrossover implements IMatingStrategy {
 			
 			//MT_posChild1 = MT_posChild1 + 2;
 			//MT_posChild2 = MT_posChild2 + 2;
-			LMT_posFather = LMT_posFather + 2;
-			LMT_posMother = LMT_posMother + 2;
+			LMT_posFather = r.nextInt(population.size());;
+			LMT_posMother = r.nextInt(population.size());
 			
 			
 			                                                                                                         

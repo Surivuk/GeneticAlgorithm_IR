@@ -42,14 +42,22 @@ public abstract class Chromosome {
 			return false;
 		}
 	}
+	
+	public void replaceFisrt(Gene g){
+		genes.set(0, g);
+	}
+	
 	public int geneCount()
 	{
 		return genes.size();
 	}
 	public void MutateGenes(){
 		Random rand = new Random();
-		int index = rand.nextInt(genes.size());
-		genes.get(index).MutateGene();
+		int howMany = rand.nextInt(genes.size() + 1);
+		for(int i = 0; i < howMany; i++){
+			int index = rand.nextInt(genes.size());
+			genes.get(index).MutateGene();
+		}
 	}
 	
 	public void Fitness(Object obj){

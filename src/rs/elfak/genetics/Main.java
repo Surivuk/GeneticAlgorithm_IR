@@ -34,7 +34,7 @@ public class Main {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		Search searchEngine = new Search("", false);
+		//Search searchEngine = new Search("", false);
 
 		// for indexing
 		// int sum = searchEngine.indexCorpus("D:\\Crawler Data 2\\",
@@ -70,7 +70,7 @@ public class Main {
 
 		GeneticAlgorithm GA = new GeneticAlgorithm(operator, population, 50);
 		
-		GA.Start(2000);
+		GA.Start(4000);
 	}
 
 }

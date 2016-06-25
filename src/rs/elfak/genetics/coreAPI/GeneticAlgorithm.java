@@ -69,16 +69,25 @@ public class GeneticAlgorithm {
 	}
 
 	public void Darvin() {
-		//boolean extinct = true;
-		double extinctionLimit = GA_population.get(0).cost - 1;
-		//int counter = GA_population.size() / 2 - 1;
-		for (int i = GA_population.size() - 1; i > 0; i--) {
+		// boolean extinct = true;
+		int t = (int) GA_population.get(0).getCost();
+		double extinctionLimit = 2;
+		/*if(t > 20)
+			extinctionLimit = t - 5;*/
 
-			if ( GA_population.get(i).getCost() <= extinctionLimit) {
-				// System.out.format("Chromosome (%s) got
-				// extinct.\n",GA_population.get(i).logicName);
-				GA_population.remove(i);
-				//counter--;
+		int topCap = 5000;
+		Random rand = new Random();
+		if (GA_population.size() - topCap > 0)
+			for(int i = GA_population.size() - 1; i > topCap - rand.nextInt(1000); i--){
+				int index = rand.nextInt(GA_population.size());
+				while(index == 0)
+					index = rand.nextInt(GA_population.size());
+				GA_population.remove(index);
+			}
+		 else {
+			for (int i = GA_population.size() - 1; i >= 0; i--) {
+				if (GA_population.get(i).getCost() < extinctionLimit)
+					GA_population.remove(i);
 			}
 		}
 	}
@@ -91,8 +100,9 @@ public class GeneticAlgorithm {
 		int counter = 0;
 		Pair pairing = new Pair(GA_population);
 		String wordForGuessing = "ththequickbrownfoxjumththequickbrownfoxjumpsoverthelazydogequickbrownfoxjumpsoverthelazydogpsoverthelazydogequickbrownfoxjumthequicthequickbrownfoxjumpsoverthelazydogkbrownfoxjumpsoverthelazydogpsoverthelththequickbrownfoxjumpsoverthelazydogequickbrownfoxs";
-		while (counter < GA_numIterations && !done) {
-			System.out.format("==============================================================");
+		int lastSize = 0;
+		while (/*counter < GA_numIterations &&*/ !done) {
+			//System.out.format("==============================================================");
 
 			FitnessPopulation(wordForGuessing);
 
@@ -100,12 +110,12 @@ public class GeneticAlgorithm {
 			MutatePopulation();
 			SortPopulation();
 			if (!Alphas.isEmpty()) {
-				if (GA_population.get(0).cost > Alphas.get(Alphas.size() - 1).cost) {
+				if (GA_population.get(0).getCost() > Alphas.get(Alphas.size() - 1).cost) {
 
 					// -------------alfa save
 					Chromosome tmp = GA_population.get(0);
 					CustomChromosome alfa = new CustomChromosome();
-					alfa.cost = tmp.cost;
+					alfa.cost = tmp.getCost();
 
 					alfa.genes = new ArrayList<Gene>();
 
@@ -114,7 +124,6 @@ public class GeneticAlgorithm {
 						gen.cost = tmp.getGene(i).cost;
 						gen.value = tmp.getGene(i).value;
 						alfa.addGene(gen);
-
 					}
 
 					alfa.logicName = tmp.logicName;
@@ -126,7 +135,7 @@ public class GeneticAlgorithm {
 					CustomChromosome alfa = new CustomChromosome();
 					Chromosome tmp = Alphas.get(Alphas.size() - 1);
 
-					alfa.cost = tmp.cost;
+					alfa.cost = tmp.getCost();
 
 					alfa.genes = new ArrayList<Gene>();
 
@@ -135,19 +144,32 @@ public class GeneticAlgorithm {
 						gen.cost = tmp.getGene(i).cost;
 						gen.value = tmp.getGene(i).value;
 						alfa.addGene(gen);
-
 					}
 
 					alfa.logicName = tmp.logicName;
 
-					GA_population.add(alfa);
+					CustomChromosome old_alfa = new CustomChromosome();
+					tmp = GA_population.get(0);
+
+					old_alfa.cost = tmp.getCost();
+
+					old_alfa.genes = new ArrayList<Gene>();
+
+					for (int i = 0; i < tmp.geneCount(); i++) {
+						Gene gen = new CustomGene();
+						gen.cost = tmp.getGene(i).cost;
+						gen.value = tmp.getGene(i).value;
+						old_alfa.addGene(gen);
+					}
+
+					old_alfa.logicName = tmp.logicName;
+					GA_population.add(old_alfa);
+					GA_population.set(0, alfa);
 				}
 			} else {
-
-				// -------------alfa save
 				Chromosome tmp = GA_population.get(0);
 				CustomChromosome alfa = new CustomChromosome();
-				alfa.cost = tmp.cost;
+				alfa.cost = tmp.getCost();
 
 				alfa.genes = new ArrayList<Gene>();
 
@@ -156,46 +178,25 @@ public class GeneticAlgorithm {
 					gen.cost = tmp.getGene(i).cost;
 					gen.value = tmp.getGene(i).value;
 					alfa.addGene(gen);
-
 				}
 
 				alfa.logicName = tmp.logicName;
-
 				Alphas.add(alfa);
-
 			}
 
 			// -------------------------
-			
+	
 			Darvin();
-
-			done = TestConvergence(100);
-
-			//RemoveDuplicates();
-			
-			// printResults();
+			done = TestConvergence(256);
+			RemoveDuplicates();
 			counter++;
-			if (counter % 10 == 0) {
-				//printResults();
-				for (int i = 0; i < Alphas.size(); i++) {
-					Alphas.get(i).printContent();
-				}
-
-				System.out.println("\nPress enter to continue...");
-				Scanner keyboard = new Scanner(System.in);
-
-				String myint = keyboard.nextLine();
-			}
-
-			System.out.format("Iteration number %d finished.Population number %d", counter, GA_population.size());
-			System.out.println("\nAlpha : ");
-			// Alpha.printContent();
-
+			//if(lastSize < Alphas.size()){
+				lastSize = Alphas.size();
+				System.out.println();
+				Alphas.get(lastSize - 1).printContent();
+				System.out.format("Iteration number %d finished.Population number %d", counter, GA_population.size());
+			//}	
 		}
-		System.out.format("==============================================================\n");
-		System.out.format("Algorithm finished.Number of iterations %d, convergence achieved : %b", counter, done);
-		// this.printResults();
-
 	}
 
 	public void SortPopulation() {
